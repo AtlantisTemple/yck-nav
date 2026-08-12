@@ -482,18 +482,6 @@ svg {
   flex: 0 0 auto;
 }
 
-@supports (grid-template-columns: repeat(auto-fill, minmax(228px, 1fr))) {
-.grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(228px, 1fr));
-  gap: 12px;
-}
-
-.results.list .grid {
-  grid-template-columns: 1fr;
-}
-}
-
 .site-card {
   display: flex;
   flex-direction: column;
