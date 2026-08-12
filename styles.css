@@ -437,6 +437,7 @@ svg {
 }
 
 .results {
+  width: 100%;
   padding: 22px 22px 34px;
 }
 
@@ -461,6 +462,28 @@ svg {
 }
 
 .grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  width: 100%;
+}
+
+.site-card,
+.site-row {
+  flex: 1 1 228px;
+  min-width: 0;
+}
+
+.results.list .grid {
+  flex-direction: column;
+}
+
+.results.list .site-row {
+  flex: 0 0 auto;
+}
+
+@supports (grid-template-columns: repeat(auto-fill, minmax(228px, 1fr))) {
+.grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(228px, 1fr));
   gap: 12px;
@@ -469,9 +492,9 @@ svg {
 .results.list .grid {
   grid-template-columns: 1fr;
 }
+}
 
 .site-card {
-  min-width: 0;
   display: flex;
   flex-direction: column;
   gap: 9px;
