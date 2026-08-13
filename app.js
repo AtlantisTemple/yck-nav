@@ -196,9 +196,15 @@
 
     categories.forEach(function (cat) {
       var locked = ADULT_CATEGORIES.has(cat.name) && !state.adult;
-      listHTML += catButtonHTML(cat, active === cat.name, locked);
-      stripHTML += chipHTML(cat, active === cat.name, locked);
+      if (locked) return;
+      listHTML += catButtonHTML(cat, active === cat.name, false);
+      stripHTML += chipHTML(cat, active === cat.name, false);
     });
+
+    if (!state.adult && categories.some(function (c) { return ADULT_CATEGORIES.has(c.name); })) {
+      stripHTML += '<button type="button" class="chip locked" data-adult-toggle aria-label="显示私密分类">' +
+        ICONS.lock + ' 显示私密分类</button>';
+    }
 
     catList.innerHTML = listHTML;
     catStrip.innerHTML = stripHTML;
@@ -497,8 +503,12 @@
   }
 
   function handleCategoryClick(e) {
-    var btn = e.target.closest('[data-cat]');
+    var btn = e.target.closest('[data-cat], [data-adult-toggle]');
     if (!btn) return;
+    if (btn.dataset.adultToggle) {
+      openAdultModal();
+      return;
+    }
     var name = btn.dataset.cat;
     if (ADULT_CATEGORIES.has(name) && !state.adult) {
       openAdultModal();
