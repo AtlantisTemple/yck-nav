@@ -271,7 +271,7 @@
       '<div class="card-name">' + esc(item.name) + '</div>' +
       '<div class="card-domain">' + esc(item.displayHost) + '</div>' +
       '</a>' +
-      '<div class="card-foot"><span class="dot" style="background:' + item.accent + '"></span><span>' + esc(catLabel(item.category)) + '</span></div>' +
+      '<div class="card-foot"><span class="cat-tag"><span class="dot" style="background:' + item.accent + '"></span><span>' + esc(catLabel(item.category)) + '</span></span></div>' +
       '</article>';
   }
 
@@ -315,7 +315,7 @@
     var html = '';
 
     if (total === 0) {
-      results.className = 'results ' + state.view;
+      results.className = 'results view-' + state.view;
       results.innerHTML = emptyHTML();
       loadWrap.hidden = true;
       updateMeta(total);
@@ -346,7 +346,7 @@
       updateLoad(slice.length, total);
     }
 
-    results.className = 'results ' + state.view;
+    results.className = 'results view-' + state.view;
     results.innerHTML = html;
     bindFavicons();
     updateMeta(total);
