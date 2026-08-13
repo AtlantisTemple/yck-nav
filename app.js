@@ -32,6 +32,14 @@
 
   var CATEGORY_ORDER = ['小说阅读', '影视动漫', 'AI工具', '工具搜索', '阅读书源', '资源网盘', '社区论坛', '新闻资讯', '其他', '美女图片', '成人内容'];
   var ADULT_CATEGORIES = new Set(['成人内容', '美女图片']);
+  var CATEGORY_LABELS = {
+    '成人内容': '私密收藏',
+    '美女图片': '图片收藏'
+  };
+
+  function catLabel(name) {
+    return CATEGORY_LABELS[name] || name;
+  }
 
   var FAV_SOURCES = [
     function (host) { return 'https://icons.duckduckgo.com/ip3/' + host + '.ico'; },
@@ -163,8 +171,8 @@
   function catButtonHTML(cat, active, locked) {
     var cls = 'cat-item' + (active ? ' active' : '') + (locked ? ' locked' : '');
     return '<button type="button" class="' + cls + '" data-cat="' + esc(cat.name) + '"' +
-      (locked ? ' aria-label="需先启用成人分类"' : '') + '>' +
-      '<span class="cat-label"><span class="dot" style="background:' + cat.color + '"></span><span>' + esc(cat.name) + '</span></span>' +
+      (locked ? ' aria-label="需先启用私密分类"' : '') + '>' +
+      '<span class="cat-label"><span class="dot" style="background:' + cat.color + '"></span><span>' + esc(catLabel(cat.name)) + '</span></span>' +
       '<span class="cat-count">' + cat.count + '</span></button>';
   }
 
@@ -176,8 +184,8 @@
   function chipHTML(cat, active, locked) {
     var cls = 'chip' + (active ? ' active' : '') + (locked ? ' locked' : '');
     return '<button type="button" class="' + cls + '" data-cat="' + esc(cat.name) + '"' +
-      (locked ? ' aria-label="需先启用成人分类"' : '') + '>' +
-      '<span class="dot" style="background:' + cat.color + '"></span>' + esc(cat.name) +
+      (locked ? ' aria-label="需先启用私密分类"' : '') + '>' +
+      '<span class="dot" style="background:' + cat.color + '"></span>' + esc(catLabel(cat.name)) +
       '<span class="cat-count">' + cat.count + '</span></button>';
   }
 
@@ -200,7 +208,7 @@
     var hasAdult = categories.some(function (c) { return ADULT_CATEGORIES.has(c.name); });
     adultBtn.hidden = !hasAdult;
     if (!hasAdult) return;
-    adultBtn.innerHTML = state.adult ? ICONS.lock + ' 隐藏成人内容' : ICONS.eyeOff + ' 启用成人内容';
+    adultBtn.innerHTML = state.adult ? ICONS.lock + ' 隐藏私密分类' : ICONS.eyeOff + ' 显示私密分类';
     adultBtn.classList.toggle('enabled', state.adult);
   }
 
@@ -221,7 +229,8 @@
         return item.name.toLowerCase().indexOf(q) !== -1 ||
           item.url.toLowerCase().indexOf(q) !== -1 ||
           item.domain.toLowerCase().indexOf(q) !== -1 ||
-          item.category.toLowerCase().indexOf(q) !== -1;
+          item.category.toLowerCase().indexOf(q) !== -1 ||
+          catLabel(item.category).toLowerCase().indexOf(q) !== -1;
       });
     }
 
@@ -253,7 +262,7 @@
       '<div class="card-name">' + esc(item.name) + '</div>' +
       '<div class="card-domain">' + esc(item.displayHost) + '</div>' +
       '</a>' +
-      '<div class="card-foot"><span class="dot" style="background:' + item.accent + '"></span><span>' + esc(item.category) + '</span></div>' +
+      '<div class="card-foot"><span class="dot" style="background:' + item.accent + '"></span><span>' + esc(catLabel(item.category)) + '</span></div>' +
       '</article>';
   }
 
@@ -268,14 +277,14 @@
       '</div>' +
       '<div class="row-meta"><div class="row-name">' + esc(item.name) + '</div><div class="row-domain">' + esc(item.displayHost) + '</div></div>' +
       '</a>' +
-      '<span class="row-cat"><span class="dot" style="background:' + item.accent + '"></span><span>' + esc(item.category) + '</span></span>' +
+      '<span class="row-cat"><span class="dot" style="background:' + item.accent + '"></span><span>' + esc(catLabel(item.category)) + '</span></span>' +
       '<button class="icon-btn copy-btn" type="button" title="复制链接" aria-label="复制 ' + esc(item.name) + ' 的链接" data-url="' + esc(item.url) + '">' + ICONS.copy + '</button>' +
       '</article>';
   }
 
   function sectionHTML(cat, list, hasMore) {
     return '<section class="cat-section" data-cat-section="' + esc(cat.name) + '">' +
-      '<h2><span class="dot" style="background:' + cat.color + '"></span>' + esc(cat.name) +
+      '<h2><span class="dot" style="background:' + cat.color + '"></span>' + esc(catLabel(cat.name)) +
       '<span class="section-count">' + cat.count + ' 个</span></h2>' +
       '<div class="grid">' + list.map(function (item) {
         return state.view === 'list' ? rowHTML(item) : cardHTML(item);
@@ -374,15 +383,15 @@
 
   function updateMeta(total) {
     var cat = state.category === 'all' ? null : categories.find(function (c) { return c.name === state.category; });
-    pageTitle.textContent = state.category === 'all' ? '全部收藏' : state.category;
+    pageTitle.textContent = state.category === 'all' ? '全部收藏' : catLabel(state.category);
     var q = state.query.trim();
     if (q) {
       pageMeta.textContent = '找到 ' + total + ' 个结果 · 搜索“' + q + '”';
     } else if (cat) {
-      pageMeta.textContent = cat.count + ' 个站点 · ' + cat.name;
+      pageMeta.textContent = cat.count + ' 个站点 · ' + catLabel(cat.name);
     } else {
       var adultNote = !state.adult && categories.some(function (c) { return ADULT_CATEGORIES.has(c.name); })
-        ? ' · 成人分类已隐藏'
+        ? ' · 私密分类已隐藏'
         : ' · ' + categories.length + ' 个分类';
       pageMeta.textContent = total + ' 个站点' + adultNote;
     }
