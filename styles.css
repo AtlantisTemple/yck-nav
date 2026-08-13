@@ -190,12 +190,11 @@ svg {
 }
 
 .adult-btn {
-  width: 100%;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 7px;
-  padding: 8px 10px;
+  width: 38px;
+  height: 38px;
+  display: inline-grid;
+  place-items: center;
+  padding: 0;
   border: 1px dashed var(--warn);
   border-radius: 8px;
   background: var(--warn-soft);
@@ -212,6 +211,13 @@ svg {
   color: var(--text-2);
   background: var(--surface-2);
   border-color: var(--border-strong);
+}
+
+.adult-toggle-chip {
+  width: 36px;
+  height: 36px;
+  padding: 0;
+  justify-content: center;
 }
 
 .side-note {

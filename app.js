@@ -202,8 +202,8 @@
     });
 
     if (!state.adult && categories.some(function (c) { return ADULT_CATEGORIES.has(c.name); })) {
-      stripHTML += '<button type="button" class="chip locked" data-adult-toggle aria-label="显示私密分类">' +
-        ICONS.lock + ' 显示私密分类</button>';
+      stripHTML += '<button type="button" class="chip adult-toggle-chip" data-adult-toggle title="显示私密分类" aria-label="显示私密分类">' +
+        ICONS.lock + '</button>';
     }
 
     catList.innerHTML = listHTML;
@@ -214,7 +214,10 @@
     var hasAdult = categories.some(function (c) { return ADULT_CATEGORIES.has(c.name); });
     adultBtn.hidden = !hasAdult;
     if (!hasAdult) return;
-    adultBtn.innerHTML = state.adult ? ICONS.lock + ' 隐藏私密分类' : ICONS.eyeOff + ' 显示私密分类';
+    adultBtn.innerHTML = ICONS.lock;
+    var label = state.adult ? '隐藏私密分类' : '显示私密分类';
+    adultBtn.title = label;
+    adultBtn.setAttribute('aria-label', label);
     adultBtn.classList.toggle('enabled', state.adult);
   }
 
