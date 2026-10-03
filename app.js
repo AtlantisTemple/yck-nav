@@ -409,6 +409,14 @@
     return catLabel(item.category) + ' · ' + item.subcategory;
   }
 
+  function tagHTML(item) {
+    return '<span class="cat-tag" title="' + esc(itemTagLabel(item)) + '">' +
+      '<span class="dot" style="background:' + item.accent + '"></span>' +
+      '<span class="tag-category">' + esc(catLabel(item.category)) + '</span>' +
+      '<span class="tag-separator">·</span>' +
+      '<span class="tag-detail">' + esc(item.subcategory) + '</span></span>';
+  }
+
   function relativeTime(timestamp) {
     var diff = Math.max(0, Date.now() - Number(timestamp || 0));
     var minute = 60000;
@@ -454,12 +462,10 @@
       '<div class="card-content"><a class="card-link" ' + href + extra + openAttr + '>' +
       '<div class="card-name">' + esc(item.name) + '</div>' +
       '<div class="card-domain">' + esc(item.displayHost) + '</div>' +
-      '</a><span class="cat-tag" title="' + esc(itemTagLabel(item)) + '"><span class="dot" style="background:' + item.accent + '"></span><span>' + esc(itemTagLabel(item)) + '</span></span></div>' +
-      '</div>' +
-      '<div class="card-foot">' +
-      (recentAt ? '<span class="recent-time">' + relativeTime(recentAt) + '</span>' : '') +
+      '</a>' + tagHTML(item) +
+      '<div class="card-actions-row">' + (recentAt ? '<span class="recent-time">' + relativeTime(recentAt) + '</span>' : '') +
       '<span class="card-actions">' + favoriteButtonHTML(item) +
-      '<button class="icon-btn copy-btn" type="button" title="复制链接" aria-label="复制 ' + esc(item.name) + ' 的链接" data-url="' + esc(item.url) + '">' + ICONS.copy + '</button></span>' +
+      '<button class="icon-btn copy-btn" type="button" title="复制链接" aria-label="复制 ' + esc(item.name) + ' 的链接" data-url="' + esc(item.url) + '">' + ICONS.copy + '</button></span></div></div>' +
       '</div>' +
       '</article>';
   }
@@ -474,7 +480,7 @@
       thumbnailHTML(item, true) +
       '<div class="row-meta"><div class="row-name">' + esc(item.name) + '</div><div class="row-domain">' + esc(item.displayHost) + '</div></div>' +
       '</a>' +
-      '<span class="row-cat" title="' + esc(itemTagLabel(item)) + '"><span class="dot" style="background:' + item.accent + '"></span><span>' + esc(itemTagLabel(item)) + '</span></span>' +
+      '<span class="row-cat" title="' + esc(itemTagLabel(item)) + '"><span class="dot" style="background:' + item.accent + '"></span><span class="tag-category">' + esc(catLabel(item.category)) + '</span><span class="tag-separator">·</span><span class="tag-detail">' + esc(item.subcategory) + '</span></span>' +
       (recentAt ? '<span class="recent-time">' + relativeTime(recentAt) + '</span>' : '') +
       '<span class="card-actions">' + favoriteButtonHTML(item) +
       '<button class="icon-btn copy-btn" type="button" title="复制链接" aria-label="复制 ' + esc(item.name) + ' 的链接" data-url="' + esc(item.url) + '">' + ICONS.copy + '</button></span>' +
