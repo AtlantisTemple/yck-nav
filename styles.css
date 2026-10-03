@@ -446,6 +446,24 @@ svg {
   display: none;
 }
 
+.subcat-strip {
+  display: flex;
+  gap: 8px;
+  padding: 0 28px 12px;
+  overflow-x: auto;
+  scrollbar-width: none;
+  max-width: var(--content-max);
+  margin: 0 auto;
+}
+
+.subcat-strip[hidden] {
+  display: none;
+}
+
+.subcat-strip::-webkit-scrollbar {
+  display: none;
+}
+
 .chip {
   flex: 0 0 auto;
   display: inline-flex;
@@ -491,6 +509,25 @@ svg {
 .chip .cat-count {
   font-size: 11px;
   opacity: 0.75;
+}
+
+.subcat-chip {
+  background: var(--surface-2);
+  border-color: var(--border);
+}
+
+.subcat-chip.active {
+  background: var(--accent-soft);
+  border-color: var(--accent);
+  color: var(--accent-text);
+}
+
+.subcat-chip.active .dot {
+  background: var(--accent) !important;
+}
+
+.subcat-chip.active .cat-count {
+  color: var(--accent-text);
 }
 
 /* ---------- 结果区 ---------- */
@@ -657,11 +694,19 @@ svg {
   display: inline-flex;
   align-items: center;
   gap: 6px;
+  max-width: 100%;
   padding: 2px 9px;
   border-radius: 999px;
   background: var(--surface-2);
   color: var(--text-2);
   font-size: 12px;
+}
+
+.cat-tag > span:last-child {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .is-script .card-link {
@@ -982,6 +1027,10 @@ svg {
   }
 
   .cat-strip {
+    padding: 0 16px 10px;
+  }
+
+  .subcat-strip {
     padding: 0 16px 10px;
   }
 

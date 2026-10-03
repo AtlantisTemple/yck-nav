@@ -4,15 +4,12 @@
   var RAW = window.NAV_DATA || [];
   var KEY_THEME = 'yck-nav-theme';
   var KEY_VIEW = 'yck-nav-view';
-  var KEY_ADULT = 'yck-nav-adult';
   var LOAD_STEP = 120;
 
   var ICONS = {
     copy: '<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="14" height="14" x="8" y="8" rx="2" ry="2"></rect><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"></path></svg>',
     moon: '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"></path></svg>',
     sun: '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"></circle><path d="M12 2v2"></path><path d="M12 20v2"></path><path d="m4.93 4.93 1.41 1.41"></path><path d="m17.66 17.66 1.41 1.41"></path><path d="M2 12h2"></path><path d="M20 12h2"></path><path d="m6.34 17.66-1.41 1.41"></path><path d="m19.07 4.93-1.41 1.41"></path></svg>',
-    lock: '<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="11" x="3" y="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>',
-    eyeOff: '<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9.88 9.88a3 3 0 1 0 4.24 4.24"></path><path d="M10.73 5.08A10.43 10.43 0 0 1 12 5c7 0 10 7 10 7a13.16 13.16 0 0 1-1.67 2.68"></path><path d="M6.61 6.61A13.526 13.526 0 0 0 2 12s3 7 10 7a9.74 9.74 0 0 0 5.39-1.61"></path><line x1="2" x2="22" y1="2" y2="22"></line></svg>',
     empty: '<svg xmlns="http://www.w3.org/2000/svg" width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><path d="m21 21-4.3-4.3"></path><path d="m8 8 6 6"></path><path d="m14 8-6 6"></path></svg>'
   };
 
@@ -31,7 +28,19 @@
   };
 
   var CATEGORY_ORDER = ['小说阅读', '影视动漫', 'AI工具', '工具搜索', '阅读书源', '资源网盘', '社区论坛', '新闻资讯', '其他', '美女图片', '成人内容'];
-  var ADULT_CATEGORIES = new Set(['成人内容', '美女图片']);
+  var SUBCATEGORY_ORDER = {
+    '小说阅读': ['在线阅读', '排行榜/书单', '文学出版', '漫画/轻小说'],
+    '影视动漫': ['在线影视', '动漫/二次元', '直播/短视频'],
+    'AI工具': ['AI对话', 'AI图像', 'AI写作/平台'],
+    '工具搜索': ['搜索引擎', '软件下载', '在线工具', '开发设计'],
+    '阅读书源': ['书源仓库', '订阅合集', '阅读工具/教程'],
+    '资源网盘': ['网盘资源', '资源检索/下载'],
+    '社区论坛': ['综合论坛', '阅读/书友', '技术兴趣'],
+    '新闻资讯': ['综合新闻', '科技/数码', '文史/杂志'],
+    '其他': ['游戏', '音乐', '生活服务', '未分类'],
+    '美女图片': ['写真美图', '壁纸摄影', '模特套图'],
+    '成人内容': ['私密视频', '私密直播', '私密图文/社区']
+  };
   var CATEGORY_LABELS = {
     '成人内容': '私密收藏',
     '美女图片': '图片收藏'
@@ -50,8 +59,8 @@
 
   var state = {
     category: 'all',
+    subcategory: 'all',
     query: '',
-    adult: false,
     sort: 'default',
     view: 'grid',
     theme: 'auto',
@@ -61,7 +70,6 @@
   };
 
   try {
-    state.adult = localStorage.getItem(KEY_ADULT) === '1';
     state.view = localStorage.getItem(KEY_VIEW) === 'list' ? 'list' : 'grid';
     state.theme = localStorage.getItem(KEY_THEME) || 'auto';
   } catch (e) {}
@@ -108,6 +116,8 @@
     var name = cleanName(raw && raw.name);
     var url = String((raw && raw.url) || '').trim();
     var category = String((raw && raw.category) || '未分类').trim();
+    var subcategory = String((raw && raw.subcategory) || '未分类').trim();
+    var tags = Array.isArray(raw && raw.tags) ? raw.tags.map(cleanName).filter(Boolean) : [];
     var domain = getDomain(url);
     var isScript = !/^https?:\/\//i.test(url) || /@js:|#@js:/i.test(url);
     return {
@@ -115,6 +125,8 @@
       name: name,
       url: url,
       category: category,
+      subcategory: subcategory,
+      tags: tags,
       domain: domain,
       displayHost: domain || '书源脚本',
       initial: (name || '?').slice(0, 1).toUpperCase(),
@@ -141,6 +153,13 @@
     }
   });
 
+  var subcategoryMap = new Map();
+  items.forEach(function (item) {
+    if (!subcategoryMap.has(item.category)) subcategoryMap.set(item.category, new Map());
+    var map = subcategoryMap.get(item.category);
+    map.set(item.subcategory, (map.get(item.subcategory) || 0) + 1);
+  });
+
   var results = $('results');
   var loadWrap = $('loadWrap');
   var loadMoreBtn = $('loadMore');
@@ -152,10 +171,7 @@
   var themeBtn = $('themeBtn');
   var catList = $('catList');
   var catStrip = $('catStrip');
-  var adultBtn = $('adultBtn');
-  var adultModal = $('adultModal');
-  var adultYes = $('adultYes');
-  var adultNo = $('adultNo');
+  var subcatStrip = $('subcatStrip');
   var pageTitle = $('pageTitle');
   var pageMeta = $('pageMeta');
   var toastEl = $('toast');
@@ -168,10 +184,9 @@
       '<span class="cat-count">' + items.length + '</span></button>';
   }
 
-  function catButtonHTML(cat, active, locked) {
-    var cls = 'cat-item' + (active ? ' active' : '') + (locked ? ' locked' : '');
-    return '<button type="button" class="' + cls + '" data-cat="' + esc(cat.name) + '"' +
-      (locked ? ' aria-label="需先启用私密分类"' : '') + '>' +
+  function catButtonHTML(cat, active) {
+    var cls = 'cat-item' + (active ? ' active' : '');
+    return '<button type="button" class="' + cls + '" data-cat="' + esc(cat.name) + '">' +
       '<span class="cat-label"><span class="dot" style="background:' + cat.color + '"></span><span>' + esc(catLabel(cat.name)) + '</span></span>' +
       '<span class="cat-count">' + cat.count + '</span></button>';
   }
@@ -181,10 +196,9 @@
       '<span class="dot" style="background:var(--accent)"></span>全部<span class="cat-count">' + items.length + '</span></button>';
   }
 
-  function chipHTML(cat, active, locked) {
-    var cls = 'chip' + (active ? ' active' : '') + (locked ? ' locked' : '');
-    return '<button type="button" class="' + cls + '" data-cat="' + esc(cat.name) + '"' +
-      (locked ? ' aria-label="需先启用私密分类"' : '') + '>' +
+  function chipHTML(cat, active) {
+    var cls = 'chip' + (active ? ' active' : '');
+    return '<button type="button" class="' + cls + '" data-cat="' + esc(cat.name) + '">' +
       '<span class="dot" style="background:' + cat.color + '"></span>' + esc(catLabel(cat.name)) +
       '<span class="cat-count">' + cat.count + '</span></button>';
   }
@@ -195,40 +209,51 @@
     var stripHTML = allChipHTML(active === 'all');
 
     categories.forEach(function (cat) {
-      var locked = ADULT_CATEGORIES.has(cat.name) && !state.adult;
-      if (locked) return;
-      listHTML += catButtonHTML(cat, active === cat.name, false);
-      stripHTML += chipHTML(cat, active === cat.name, false);
+      listHTML += catButtonHTML(cat, active === cat.name);
+      stripHTML += chipHTML(cat, active === cat.name);
     });
-
-    if (!state.adult && categories.some(function (c) { return ADULT_CATEGORIES.has(c.name); })) {
-      stripHTML += '<button type="button" class="chip adult-toggle-chip" data-adult-toggle title="显示私密分类" aria-label="显示私密分类">' +
-        ICONS.lock + '</button>';
-    }
 
     catList.innerHTML = listHTML;
     catStrip.innerHTML = stripHTML;
   }
 
-  function renderAdultButton() {
-    var hasAdult = categories.some(function (c) { return ADULT_CATEGORIES.has(c.name); });
-    adultBtn.hidden = !hasAdult;
-    if (!hasAdult) return;
-    adultBtn.innerHTML = ICONS.lock;
-    var label = state.adult ? '隐藏私密分类' : '显示私密分类';
-    adultBtn.title = label;
-    adultBtn.setAttribute('aria-label', label);
-    adultBtn.classList.toggle('enabled', state.adult);
+  function renderSubcategoryNav() {
+    if (state.category === 'all') {
+      subcatStrip.hidden = true;
+      subcatStrip.innerHTML = '';
+      return;
+    }
+
+    var counts = subcategoryMap.get(state.category) || new Map();
+    var order = SUBCATEGORY_ORDER[state.category] || [];
+    var names = order.filter(function (name) { return counts.has(name); });
+    counts.forEach(function (count, name) {
+      if (names.indexOf(name) === -1) names.push(name);
+    });
+
+    var total = categories.find(function (cat) { return cat.name === state.category; });
+    var html = '<button type="button" class="chip subcat-chip' + (state.subcategory === 'all' ? ' active' : '') + '" data-subcat="all">' +
+      '全部<span class="cat-count">' + (total ? total.count : items.length) + '</span></button>';
+    names.forEach(function (name) {
+      html += '<button type="button" class="chip subcat-chip' + (state.subcategory === name ? ' active' : '') + '" data-subcat="' + esc(name) + '">' +
+        esc(name) + '<span class="cat-count">' + counts.get(name) + '</span></button>';
+    });
+    subcatStrip.innerHTML = html;
+    subcatStrip.hidden = false;
   }
 
   function getFiltered() {
-    var list = items.filter(function (item) {
-      return state.adult || !ADULT_CATEGORIES.has(item.category);
-    });
+    var list = items.slice();
 
     if (state.category !== 'all') {
       list = list.filter(function (item) {
         return item.category === state.category;
+      });
+    }
+
+    if (state.subcategory !== 'all') {
+      list = list.filter(function (item) {
+        return item.subcategory === state.subcategory;
       });
     }
 
@@ -239,7 +264,9 @@
           item.url.toLowerCase().indexOf(q) !== -1 ||
           item.domain.toLowerCase().indexOf(q) !== -1 ||
           item.category.toLowerCase().indexOf(q) !== -1 ||
-          catLabel(item.category).toLowerCase().indexOf(q) !== -1;
+          item.subcategory.toLowerCase().indexOf(q) !== -1 ||
+          catLabel(item.category).toLowerCase().indexOf(q) !== -1 ||
+          item.tags.some(function (tag) { return tag.toLowerCase().indexOf(q) !== -1; });
       });
     }
 
@@ -254,6 +281,10 @@
     }
 
     return list;
+  }
+
+  function itemTagLabel(item) {
+    return catLabel(item.category) + ' · ' + item.subcategory;
   }
 
   function cardHTML(item) {
@@ -271,7 +302,7 @@
       '<div class="card-name">' + esc(item.name) + '</div>' +
       '<div class="card-domain">' + esc(item.displayHost) + '</div>' +
       '</a>' +
-      '<div class="card-foot"><span class="cat-tag"><span class="dot" style="background:' + item.accent + '"></span><span>' + esc(catLabel(item.category)) + '</span></span></div>' +
+      '<div class="card-foot"><span class="cat-tag" title="' + esc(itemTagLabel(item)) + '"><span class="dot" style="background:' + item.accent + '"></span><span>' + esc(itemTagLabel(item)) + '</span></span></div>' +
       '</article>';
   }
 
@@ -286,7 +317,7 @@
       '</div>' +
       '<div class="row-meta"><div class="row-name">' + esc(item.name) + '</div><div class="row-domain">' + esc(item.displayHost) + '</div></div>' +
       '</a>' +
-      '<span class="row-cat"><span class="dot" style="background:' + item.accent + '"></span><span>' + esc(catLabel(item.category)) + '</span></span>' +
+      '<span class="row-cat" title="' + esc(itemTagLabel(item)) + '"><span class="dot" style="background:' + item.accent + '"></span><span>' + esc(itemTagLabel(item)) + '</span></span>' +
       '<button class="icon-btn copy-btn" type="button" title="复制链接" aria-label="复制 ' + esc(item.name) + ' 的链接" data-url="' + esc(item.url) + '">' + ICONS.copy + '</button>' +
       '</article>';
   }
@@ -324,7 +355,6 @@
 
     if (isGrouped) {
       categories.forEach(function (cat) {
-        if (!state.adult && ADULT_CATEGORIES.has(cat.name)) return;
         var catItems = filtered.filter(function (item) {
           return item.category === cat.name;
         });
@@ -396,25 +426,31 @@
     var q = state.query.trim();
     if (q) {
       pageMeta.textContent = '找到 ' + total + ' 个结果 · 搜索“' + q + '”';
+    } else if (cat && state.subcategory !== 'all') {
+      pageMeta.textContent = total + ' 个站点 · ' + catLabel(cat.name) + ' · ' + state.subcategory;
     } else if (cat) {
-      pageMeta.textContent = cat.count + ' 个站点 · ' + catLabel(cat.name);
+      pageMeta.textContent = cat.count + ' 个站点 · ' + catLabel(cat.name) + ' · ' + (subcategoryMap.get(cat.name) || new Map()).size + ' 个子类';
     } else {
-      var adultNote = !state.adult && categories.some(function (c) { return ADULT_CATEGORIES.has(c.name); })
-        ? ' · 私密分类已隐藏'
-        : ' · ' + categories.length + ' 个分类';
-      pageMeta.textContent = total + ' 个站点' + adultNote;
+      pageMeta.textContent = total + ' 个站点 · ' + categories.length + ' 个分类';
     }
   }
 
   function setCategory(name) {
-    if (ADULT_CATEGORIES.has(name) && !state.adult) {
-      openAdultModal();
-      return;
-    }
     state.category = name;
+    state.subcategory = 'all';
     state.visibleCount = LOAD_STEP;
     state.groupMore = {};
     renderCategoryNav();
+    renderSubcategoryNav();
+    renderResults();
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  function setSubcategory(name) {
+    state.subcategory = name;
+    state.visibleCount = LOAD_STEP;
+    state.groupMore = {};
+    renderSubcategoryNav();
     renderResults();
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }
@@ -434,33 +470,6 @@
     document.documentElement.dataset.theme = resolved;
     themeBtn.innerHTML = resolved === 'dark' ? ICONS.sun : ICONS.moon;
     themeBtn.title = resolved === 'dark' ? '切换为浅色' : '切换为深色';
-  }
-
-  function openAdultModal() {
-    adultModal.hidden = false;
-    adultYes.focus();
-  }
-
-  function closeAdultModal() {
-    adultModal.hidden = true;
-  }
-
-  function enableAdult() {
-    state.adult = true;
-    try { localStorage.setItem(KEY_ADULT, '1'); } catch (e) {}
-    closeAdultModal();
-    renderCategoryNav();
-    renderAdultButton();
-    renderResults();
-  }
-
-  function disableAdult() {
-    state.adult = false;
-    try { localStorage.removeItem(KEY_ADULT); } catch (e) {}
-    if (ADULT_CATEGORIES.has(state.category)) state.category = 'all';
-    renderCategoryNav();
-    renderAdultButton();
-    renderResults();
   }
 
   function toast(message) {
@@ -506,18 +515,15 @@
   }
 
   function handleCategoryClick(e) {
-    var btn = e.target.closest('[data-cat], [data-adult-toggle]');
+    var btn = e.target.closest('[data-cat]');
     if (!btn) return;
-    if (btn.dataset.adultToggle) {
-      openAdultModal();
-      return;
-    }
-    var name = btn.dataset.cat;
-    if (ADULT_CATEGORIES.has(name) && !state.adult) {
-      openAdultModal();
-      return;
-    }
-    setCategory(name);
+    setCategory(btn.dataset.cat);
+  }
+
+  function handleSubcategoryClick(e) {
+    var btn = e.target.closest('[data-subcat]');
+    if (!btn) return;
+    setSubcategory(btn.dataset.subcat);
   }
 
   results.addEventListener('click', function (e) {
@@ -537,6 +543,7 @@
 
   catList.addEventListener('click', handleCategoryClick);
   catStrip.addEventListener('click', handleCategoryClick);
+  subcatStrip.addEventListener('click', handleSubcategoryClick);
 
   searchInput.addEventListener('input', function () {
     clearBtn.hidden = !searchInput.value;
@@ -576,21 +583,6 @@
     applyTheme();
   });
 
-  adultBtn.addEventListener('click', function () {
-    if (state.adult) {
-      disableAdult();
-    } else {
-      openAdultModal();
-    }
-  });
-
-  adultYes.addEventListener('click', enableAdult);
-  adultNo.addEventListener('click', closeAdultModal);
-
-  adultModal.addEventListener('click', function (e) {
-    if (e.target === adultModal) closeAdultModal();
-  });
-
   document.addEventListener('keydown', function (e) {
     if (e.key === '/' && document.activeElement !== searchInput && !e.metaKey && !e.ctrlKey && !e.altKey) {
       e.preventDefault();
@@ -614,7 +606,7 @@
 
   function init() {
     renderCategoryNav();
-    renderAdultButton();
+    renderSubcategoryNav();
     applyTheme();
     setView(state.view);
     sortSelect.value = state.sort;
