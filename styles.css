@@ -682,8 +682,8 @@ svg {
 .site-thumb-wrap {
   position: relative;
   width: 96px;
-  height: 88px;
   flex: 0 0 96px;
+  align-self: stretch;
   overflow: hidden;
   border-radius: 12px;
   background: color-mix(in srgb, var(--item-color, var(--accent)) 10%, var(--surface-2));
@@ -1256,7 +1256,6 @@ svg {
 
   .site-thumb-wrap {
     width: 64px;
-    height: 80px;
     flex-basis: 64px;
     border-radius: 10px;
   }
